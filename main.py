@@ -1,11 +1,5 @@
+import uvicorn
 from fastapi import FastAPI
-from enum import Enum
-
-
-class EnumClass(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
 
 
 app = FastAPI()
@@ -13,18 +7,12 @@ app = FastAPI()
 
 @app.get('/')
 async def hello_world():
-    return {"message": "Hello World"}
-
-@app.get('/items/{item_name}')
-def give_item_name(item_name: int):
-    return {"item": item_name}
+    return {"message": "Hello World new changes"}
 
 
-@app.get('/enum/example/{modalName}')
-def enum_example(modal_name: EnumClass):
-    if modal_name is EnumClass.alexnet:
-        return {"modalName": modal_name}
-    elif modal_name is EnumClass.resnet:
-        return {"modalName": modal_name}
-    elif modal_name.value == 'lenet':
-        return {"modalName": modal_name}
+@app.get('/item')
+async def hello_world():
+    return {"message": "Hello World new changes"}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="localhost", port=8000,  reload=True, debug=True, workers=3)
