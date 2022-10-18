@@ -40,10 +40,19 @@ def enum_query_params(team_member: UserEnum):
 
 # we can fastApi built in func Query() for extra validation we need for query param
 # we can use min/max/alias/regex for validating the incoming param
+# we can meta data information too in Query()
 # we can also use default key to initialize the param if we want to required the param we just don't include default key
 # Example regex is only accept admin string as query param
 @app.get("/usertype/")
-def get_user_type(user_type: str = Query(min_length=3, max_length=15, regex="^admin$")):
+def get_user_type(
+    user_type: str = Query(
+        min_length=3,
+        max_length=15,
+        regex="^admin$",
+        title="Get User Type",
+        description="This endpoint will get usertype from user",
+    )
+):
     return user_type
 
 

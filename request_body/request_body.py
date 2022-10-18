@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Body, Query
 from pydantic import BaseModel
 
 
@@ -8,6 +8,12 @@ class Item(BaseModel):
     description: str = None
     price: int
     tax: int = None
+
+
+class User(BaseModel):
+    name: str
+    age: int
+    post: str
 
 
 app = FastAPI()
@@ -40,6 +46,23 @@ def save_item(item: Item):
 def all_params(name: str, item: Item, q: int = None):
     item_dict = item.dict()
     return {"path_parameter": name, "query_params": q, "item": item}
+
+
+# we can use fastapi built in Body() func to do all the validation that it provides like min/max_length/regex/alias
+# and meta information title/description we can use mix of path, query and body params fastapi is smart enough to
+# recognise who is what we can use multiple pydantic modals for request body we can embed more properties in the
+# request body using the Body(embed=True)
+@app.post("/user/{user_id}/item/{item_id}")
+def multiple_user_body_params(
+    *,
+    user_id: int = Path(),
+    item_id: int = Path(),
+    item: Item = Body(),
+    user: User = Body(),
+    q: str | None = Query(default=None),
+    approval: bool = Body(default=False, embed=True)
+):
+    return {user_id, item_id, item, user}
 
 
 if __name__ == "__main__":
