@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import uvicorn
 from fastapi import FastAPI, Path, Body, Query
 from pydantic import BaseModel, Field, HttpUrl
@@ -11,7 +13,7 @@ class Image(BaseModel):
 
 class Item(BaseModel):
     # we can use Field() from pydantic to add extra validation
-    name: str = Field()
+    name: str = Field(example="tashfeen")
     description: str = None
     price: int
     tax: int = None
@@ -20,6 +22,18 @@ class Item(BaseModel):
     image: Image
     # we can also use pydantic modal as pure lists type
     multiple_img: list[Image]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "foo",
+                "description": "A item",
+                "price": 2,
+                "tax": 1,
+                "tags": ["imp"],
+                "image": {"name": "ima3", "url": "http://www.image.com"},
+            }
+        }
 
 
 class User(BaseModel):
@@ -32,7 +46,7 @@ class Offer(BaseModel):
     # we can use deeply nested modal as type, fast api will give
     # us all the conversion, validation, json conversion automatically
     item: Item
-    date: str
+    date: datetime
 
 
 app = FastAPI()
@@ -62,7 +76,30 @@ def save_item(item: Item):
 # and does not matches in provided variable than it will be query param.
 # if data is coming as dict from the request body
 @app.post("/item/{name}")
-def all_params(name: str, item: Item, q: int = None):
+def all_params(
+    name: str,
+    item: Item = Body(
+        examples={
+            "example1": {
+                "name": "foo",
+                "description": "A item",
+                "price": 2,
+                "tax": 1,
+                "tags": ["imp"],
+                "image": {"name": "ima3", "url": "http://www.image.com"},
+            },
+            "example2": {
+                "name": "foo",
+                "description": "A item",
+                "price": 2,
+                "tax": 1,
+                "tags": ["imp"],
+                "image": {"name": "ima3", "url": "http://www.image.com"},
+            },
+        }
+    ),
+    q: int = None,
+):
     item_dict = item.dict()
     return {"path_parameter": name, "query_params": q, "item": item}
 
@@ -73,13 +110,13 @@ def all_params(name: str, item: Item, q: int = None):
 # request body using the Body(embed=True)
 @app.post("/user/{user_id}/item/{item_id}")
 def multiple_user_body_params(
-        *,
-        user_id: int = Path(),
-        item_id: int = Path(),
-        item: Item = Body(),
-        user: User = Body(),
-        q: str | None = Query(default=None),
-        approval: bool = Body(default=False, embed=True)
+    *,
+    user_id: int = Path(),
+    item_id: int = Path(),
+    item: Item = Body(),
+    user: User = Body(),
+    q: str | None = Query(default=None),
+    approval: bool = Body(default=False, embed=True)
 ):
     item_dict = item.dict()
     return {"u": user_id, "result": item_dict, "u": user}
@@ -87,10 +124,10 @@ def multiple_user_body_params(
 
 if __name__ == "__main__":
     uvicorn.run(
-            "request_body:app",
-            host="localhost",
-            port=8000,
-            reload=True,
-            debug=True,
-            workers=3,
+        "request_body:app",
+        host="localhost",
+        port=8000,
+        reload=True,
+        debug=True,
+        workers=3,
     )
