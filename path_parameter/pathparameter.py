@@ -44,5 +44,5 @@ def get_item_id(*, item_id: int = Path(ge=0, le=100), q: str):
 
 if __name__ == "__main__":
     uvicorn.run(
-        "pathparameter:app", host="localhost", port=8000, reload=True, workers=3
+        "path_parameter:app", host="localhost", port=8000, reload=True, workers=3
     )
